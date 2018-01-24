@@ -27,7 +27,7 @@ string capitalizeStr(string s) {
 	for (int i = 0; i < s.length(); i++) {
 		if (newWord == false && (s.at(i) >= 'a' && s.at(i) <= 'z')) {
       s.at(i) = s.at(i) + 'A'-'a';
-    } 
+    }
 		if ((s.at(i) >= 'a' && s.at(i) <= 'z') || (s.at(i) >= 'A' && s.at(i) <= 'Z')) {
       newWord = true;
     } else {
@@ -38,13 +38,13 @@ string capitalizeStr(string s) {
 }
 
 int main() {
-  char chrs1[] = "it is a fine day today";
-  string str1 = "it is a fine day today";
-  cout << capitalizeChar(chrs1) << endl;
-  cout << capitalizeStr(str1) << endl;
+  char chrs[50];
+  cout << "Please input a character array less than 50:" << endl;
+  cin.getline(chrs, 50);
+  cout << capitalizeChar(chrs) << endl;
 
-  char chrs2[] = "hello world";
-  string str2 = "hello world";
-  cout << capitalizeChar(chrs2) << endl;
-  cout << capitalizeStr(str2) << endl;
+  string str;
+  cout << "Please input a character array less than 50:" << endl;
+  getline(cin, str);
+  cout << capitalizeStr(str) << endl;
 }
