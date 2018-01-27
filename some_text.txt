@@ -1,0 +1,5 @@
+this is a first line of text.
+这是文件的第二行
+Golang is the most lovely programming language in the world!
+I love Python.
+I hate C++
