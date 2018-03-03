@@ -27,6 +27,8 @@ void PolyTerm::print() {
 class Polynomial {
 private:
   PolyTerm *polyHead;
+  void dealWithCoeff0();
+  int dealWithSum(char sign1, int coeff1, char sign2, int coeff2);
 public:
   Polynomial();
   void insertAtBeginning(char sgn, int coeff, int expo);
@@ -62,41 +64,37 @@ void Polynomial::insertAtEnd(char sgn, int coeff, int expo) {
 }
 
 void Polynomial::insertInOrder(char sgn, int coeff, int expo) {
-  if (!polyHead) {
-    polyHead = new PolyTerm(sgn, coeff, expo);
+  if (!polyHead || polyHead->exponent < expo) {
+    insertAtBeginning(sgn, coeff, expo);
     return;
   }
 
-  PolyTerm *iter = polyHead;
-  while (iter->next && iter->next->exponent > expo) {
-    iter = iter->next;
+  PolyTerm *prev = polyHead;
+  PolyTerm *next = polyHead->next;
+  while (next && next->exponent > expo) {
+    prev = next;
+    next = next->next;
   }
 
-  if (!iter->next) {
-    if (expo > iter->exponent) {
-      PolyTerm *term = new PolyTerm(sgn, coeff, expo);
-      term->next = iter;
-      iter = term;
-    } else if (expo == iter->exponent) {
-      int coeff1 = iter->sign == '+' ? iter->coefficient : -iter->coefficient;
-      int coeff2 = sgn == '+' ? coeff : -coeff;
-      int sum = coeff1 + coeff2;
-      iter->coefficient = sum >= 0 ? sum : -sum;
-      iter->sign = sum >= 0 ? '+' : '-';
-    } else {
-      iter->next = new PolyTerm(sgn, coeff, expo);
-    }
-  } else if (iter->next->exponent == expo) {
-    int coeff1 = iter->sign == '+' ? iter->coefficient : -iter->coefficient;
-    int coeff2 = sgn == '+' ? coeff : -coeff;
-    int sum = coeff1 + coeff2;
-    iter->next->coefficient = sum >= 0 ? sum : -sum;
-    iter->next->sign = sum >= 0 ? '+' : '-';
+  if (prev->exponent < expo) {
+    PolyTerm *term = new PolyTerm(sgn, coeff, expo);
+    term->next = prev;
+    prev = term;
+  } else if (prev->exponent == expo) {
+    int sum = dealWithSum(prev->sign, prev->coefficient, sgn, coeff);
+    prev->sign = sum >= 0 ? '+' : '-';
+    prev->coefficient = sum >= 0 ? sum : -sum;
+  } else if (next && next->exponent == expo) {
+    int sum = dealWithSum(next->sign, next->coefficient, sgn, coeff);
+    next->sign = sum >= 0 ? '+' : '-';
+    next->coefficient = sum >= 0 ? sum : -sum;
   } else {
     PolyTerm *term = new PolyTerm(sgn, coeff, expo);
-    term->next = iter->next;
-    iter->next = term;
+    prev->next = term;
+    term->next = next;
   }
+
+  dealWithCoeff0();
 }
 
 void Polynomial::print() {
@@ -107,6 +105,31 @@ void Polynomial::print() {
     iter = iter->next;
   }
   cout << endl;
+}
+
+void Polynomial::dealWithCoeff0() {
+  if (polyHead->coefficient == 0) {
+    polyHead = polyHead->next;
+  }
+
+  PolyTerm *prev = polyHead;
+  PolyTerm *next = polyHead->next;;
+
+  while (next && next->coefficient != 0) {
+    prev = next;
+    next = next->next;
+  }
+
+  if (next && next->coefficient == 0) {
+    prev->next = next->next;
+  }
+}
+
+int Polynomial::dealWithSum(char sign1, int abs1, char sign2, int abs2) {
+  int coeff1 = sign1 == '+' ? abs1 : -abs1;
+  int coeff2 = sign2 == '+' ? abs2 : -abs2;
+
+  return coeff1 + coeff2;
 }
 
 Polynomial input(string poly) {
@@ -141,10 +164,29 @@ void runPolyTermTests() {
 void runPolynomialTests() {
   Polynomial poly1 = input("+ 3 x 2 - 8 x 7 + 1 x 5 - 2 x 2 + 1 x 1 - 7 x 0 + 4 x 3");
   poly1.print();
+
+  Polynomial poly2 = input("+7x4-5x6+3x3");
+  poly2.print();
+
+  Polynomial poly3 = input("-7x4+5x6-3x3+3x3+1x0");
+  poly3.print();
 }
 
 int main() {
+  cout << "Testing for PolyTerm" << endl;
   runPolyTermTests();
 
+  cout << "Testing for Polynomial" << endl;
   runPolynomialTests();
+
+  Polynomial poly;
+  cout << "INPUT: + 3 x 2 - 8 x 7 + 1 x 5 - 2 x 2 + 1 x 1 - 7 x 0 + 4 x 3" << endl;
+  poly.insertInOrder('+', 3, 2); poly.print();
+  poly.insertInOrder('-', 8, 7); poly.print();
+  poly.insertInOrder('+', 1, 5); poly.print();
+  poly.insertInOrder('-', 2, 2); poly.print();
+  poly.insertInOrder('+', 1, 1); poly.print();
+  poly.insertInOrder('-', 7, 0); poly.print();
+  poly.insertInOrder('+', 4, 3); poly.print();
+  cout << "OUTPUT: - 8 x 7 + 1 x 5 + 4 x 3 + 1 x 2 + 1 x 1 - 7 x 0 " << endl;
 }
